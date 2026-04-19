@@ -1,5 +1,10 @@
-name: Setup Rokit
+name: ThatTimothy/setup-rokit
 description: Installs Rokit and tools defined in rokit.toml
+author: ThatTimothy
+
+branding:
+  icon: arrow-down-circle
+  color: blue
 
 inputs:
   token:
