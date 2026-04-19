@@ -1,0 +1,42 @@
+name: Setup Rokit
+description: Installs Rokit and tools defined in rokit.toml
+
+inputs:
+  token:
+    description: GitHub token for authenticated requests
+    default: ${{ github.token }}
+  cache:
+    description: Whether to cache Rokit and tools
+    default: "true"
+  working-directory:
+    description: Directory containing rokit.toml
+    default: "."
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Rokit
+      id: cache-rokit
+      if: inputs.cache == 'true'
+      uses: actions/cache@v5
+      with:
+        path: ~/.rokit
+        key: rokit-${{ runner.os }}-${{ hashFiles(format('{0}/rokit.toml', inputs.working-directory)) }}
+
+    - name: Install Rokit
+      if: steps.cache-rokit.outputs.cache-hit != 'true'
+      shell: bash
+      run: curl -sSf https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.sh | bash
+      env:
+        GITHUB_PAT: ${{ inputs.token }}
+
+    - name: Add Rokit to PATH
+      shell: bash
+      run: echo "$HOME/.rokit/bin" >> $GITHUB_PATH
+
+    - name: Install tools
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: rokit install --no-trust-check
+      env:
+        ROKIT_GITHUB_TOKEN: ${{ inputs.token }}
